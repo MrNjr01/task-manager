@@ -17,11 +17,15 @@ const statusLabels: Record<string, string> = {
 
 interface TaskListProps {
   tasks: Task[];
+  viewFilter?: string;
   onEdit: (task: Task) => void;
 }
 
-export function TaskList({ tasks, onEdit }: TaskListProps) {
+export function TaskList({ tasks, viewFilter = 'my', onEdit }: TaskListProps) {
   if (tasks.length === 0) return <div className="text-center text-muted-foreground py-8">No tasks</div>;
+
+  const getAssignedBy = (t: Task) => t.assignees?.[0]?.assignedByUser?.name || '—';
+  const getAssignedTo = (t: Task) => t.assignees?.map(a => a.user.name).join(', ') || '—';
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -32,7 +36,14 @@ export function TaskList({ tasks, onEdit }: TaskListProps) {
             <th className="text-left p-3 font-medium">Status</th>
             <th className="text-left p-3 font-medium">Priority</th>
             <th className="text-left p-3 font-medium">Due</th>
-            <th className="text-left p-3 font-medium">Assigned By</th>
+            {viewFilter === 'my' && <th className="text-left p-3 font-medium">Assigned By</th>}
+            {viewFilter === 'delegated' && <th className="text-left p-3 font-medium">Assigned To</th>}
+            {viewFilter === 'redelegated' && (
+              <>
+                <th className="text-left p-3 font-medium">Assigned By</th>
+                <th className="text-left p-3 font-medium">Assigned To</th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y">
@@ -42,7 +53,14 @@ export function TaskList({ tasks, onEdit }: TaskListProps) {
               <td className="p-3"><span className={cn('px-2 py-0.5 rounded-full text-xs', statusColors[t.status])}>{statusLabels[t.status]}</span></td>
               <td className="p-3 capitalize">{t.priority}</td>
               <td className="p-3">{formatDate(t.dueDate)}</td>
-              <td className="p-3">{t.assignees?.[0]?.assignedByUser?.name || '—'}</td>
+              {viewFilter === 'my' && <td className="p-3">{getAssignedBy(t)}</td>}
+              {viewFilter === 'delegated' && <td className="p-3">{getAssignedTo(t)}</td>}
+              {viewFilter === 'redelegated' && (
+                <>
+                  <td className="p-3">{getAssignedBy(t)}</td>
+                  <td className="p-3">{getAssignedTo(t)}</td>
+                </>
+              )}
             </tr>
           ))}
         </tbody>
