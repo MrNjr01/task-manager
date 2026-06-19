@@ -11,7 +11,9 @@ router.get('/tasks', async (req: AuthRequest, res, next) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const { tasks, total } = await listTasks(req.user!.userId, req.user!.role, req.query, page, limit);
+    const scope = req.query.scope as string;
+    req.query.scope = undefined; // remove from other filters
+    const { tasks, total } = await listTasks(req.user!.userId, req.user!.role, { ...req.query, scope }, page, limit);
     res.json({ data: { tasks }, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (err) { next(err); }
 });
@@ -35,6 +37,12 @@ router.put('/tasks/:id', validate(updateTaskSchema), async (req: AuthRequest, re
   try {
     const task = await getTask(req.params.id, req.user!.userId, req.user!.role);
     if (!task) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Task not found' } });
+    if (task.createdBy !== req.user!.userId && req.user!.role !== 'admin') {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Only creator or admin can edit' } });
+    }
+    if (task.status === 'done' && req.user!.role !== 'admin') {
+      return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Completed tasks cannot be edited' } });
+    }
     const updated = await updateTask(req.params.id, req.body);
     res.json({ data: { task: updated } });
   } catch (err) { next(err); }

@@ -19,35 +19,19 @@ export default function Tasks() {
   const [showForm, setShowForm] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
-  const [allTasks, setAllTasks] = useState<Task[]>([]);
-  const { tasks, loading, createTask, updateTask } = useTasks();
+  const scopeMap: Record<string, string> = { my: 'my', delegated: 'delegated', redelegated: 'redelegated' };
+  const { tasks, loading, createTask, updateTask } = useTasks({ scope: scopeMap[viewFilter] || 'my' });
 
   useEffect(() => {
     api.get<any>('/api/users').then(r => setUsers(r.data.users)).catch(() => setUsers([]));
     api.get<any>('/api/projects').then(r => setProjects(r.data.projects)).catch(() => setProjects([]));
   }, []);
 
-  useEffect(() => {
-    setAllTasks(tasks);
-  }, [tasks]);
-
   const handleStatusChange = async (taskId: string, status: Task['status']) => {
     try { await updateTask(taskId, { status }); } catch {}
   };
 
-  // Filter tasks based on view
-  const filteredTasks = allTasks.filter(t => {
-    if (viewFilter === 'my') return true; // all assigned to me
-    if (viewFilter === 'delegated') {
-      return t.assignees?.some((a: any) => a.assignedByUser?.id === user?.id && a.user.id !== user?.id);
-    }
-    if (viewFilter === 'redelegated') {
-      return t.assignees?.some((a: any) => a.user.id === user?.id && a.assignedByUser?.id !== user?.id && a.assignedByUser?.id);
-    }
-    return true;
-  });
-
-  const viewTitle = viewFilter === 'my' ? 'My Tasks' : viewFilter === 'delegated' ? 'Delegated Tasks' : 'Redelegated Tasks';
+  const viewTitle = viewFilter === 'my' ? 'My Tasks' : viewFilter === 'delegated' ? 'Delegated' : 'Redelegated';
 
   return (
     <div className="space-y-4">
@@ -66,9 +50,9 @@ export default function Tasks() {
 
       {loading && <div className="text-center py-8">Loading tasks...</div>}
 
-      {view === 'list' && !loading && <TaskList tasks={filteredTasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
-      {view === 'kanban' && !loading && <TaskKanban tasks={filteredTasks} onEdit={t => navigate(`/tasks/${t.id}`)} onStatusChange={handleStatusChange} />}
-      {view === 'tree' && !loading && <TaskTree tasks={filteredTasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
+      {view === 'list' && !loading && <TaskList tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
+      {view === 'kanban' && !loading && <TaskKanban tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} onStatusChange={handleStatusChange} />}
+      {view === 'tree' && !loading && <TaskTree tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
 
       {showForm && (
         <TaskForm

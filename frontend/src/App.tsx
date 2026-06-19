@@ -9,6 +9,9 @@ import Tasks from './pages/Tasks';
 import TaskDetail from './pages/TaskDetail';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
+import Calendar from './pages/Calendar';
+import About from './pages/About';
+import Help from './pages/Help';
 import Admin from './pages/Admin';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
@@ -43,6 +46,9 @@ export default function App() {
             <Route path="/tasks/:id" element={<ProtectedRoute><AppLayout><TaskDetail /></AppLayout></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><AppLayout><Projects /></AppLayout></ProtectedRoute>} />
             <Route path="/projects/:id" element={<ProtectedRoute><AppLayout><ProjectDetail /></AppLayout></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><AppLayout><Calendar /></AppLayout></ProtectedRoute>} />
+            <Route path="/about" element={<ProtectedRoute><AppLayout><About /></AppLayout></ProtectedRoute>} />
+            <Route path="/help" element={<ProtectedRoute><AppLayout><Help /></AppLayout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
