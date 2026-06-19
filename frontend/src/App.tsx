@@ -4,6 +4,11 @@ import { ThemeProvider } from './hooks/useTheme';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Tasks from './pages/Tasks';
+import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
+import Admin from './pages/Admin';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, loading } = useAuth();
@@ -32,10 +37,11 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<ProtectedRoute><AppLayout><DashboardPlaceholder /></AppLayout></ProtectedRoute>} />
-            <Route path="/tasks" element={<ProtectedRoute><AppLayout><TasksPlaceholder /></AppLayout></ProtectedRoute>} />
-            <Route path="/projects" element={<ProtectedRoute><AppLayout><ProjectsPlaceholder /></AppLayout></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute adminOnly><AppLayout><AdminPlaceholder /></AppLayout></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+            <Route path="/tasks" element={<ProtectedRoute><AppLayout><Tasks /></AppLayout></ProtectedRoute>} />
+            <Route path="/projects" element={<ProtectedRoute><AppLayout><Projects /></AppLayout></ProtectedRoute>} />
+            <Route path="/projects/:id" element={<ProtectedRoute><AppLayout><ProjectDetail /></AppLayout></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute adminOnly><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>
@@ -43,8 +49,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-function DashboardPlaceholder() { return <div>Dashboard (coming soon)</div>; }
-function TasksPlaceholder() { return <div>Tasks (coming soon)</div>; }
-function ProjectsPlaceholder() { return <div>Projects (coming soon)</div>; }
-function AdminPlaceholder() { return <div>Admin (coming soon)</div>; }
