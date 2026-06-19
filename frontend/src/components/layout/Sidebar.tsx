@@ -1,27 +1,19 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { LayoutDashboard, User, Send, Repeat, FolderKanban, Users, InfoCircle, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, User, Send, Repeat, FolderKanban, Users, Info, HelpCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
-
-const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/tasks?view=my', icon: User, label: 'My Tasks', view: 'my' },
-  { to: '/tasks?view=delegated', icon: Send, label: 'Delegated', view: 'delegated' },
-  { to: '/tasks?view=redelegated', icon: Repeat, label: 'Redelegated', view: 'redelegated' },
-  { to: '/projects', icon: FolderKanban, label: 'Projects' },
-  { to: '/calendar', icon: HelpCircle, label: 'Calendar', view: 'calendar' },
-];
 
 export function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const currentView = searchParams.get('view');
 
-  const isActive = (item: any) => {
-    if (item.view) {
-      return location.pathname.startsWith('/tasks') && searchParams.get('view') === item.view;
+  const isActive = (path: string, view?: string) => {
+    if (view) {
+      return location.pathname === '/tasks' && currentView === view;
     }
-    return location.pathname === item.to;
+    return location.pathname === path;
   };
 
   return (
@@ -31,27 +23,32 @@ export function Sidebar() {
         <p className="text-sm text-muted-foreground">{user?.department}</p>
       </div>
       <nav className="space-y-1 flex-1">
-        {navItems.map(({ to, icon: Icon, label, view }) => (
-          <Link
-            key={to}
-            to={to}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
-              isActive({ view }) ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent'
-            )}
-          >
-            <Icon className="w-5 h-5" />
-            {label}
-          </Link>
-        ))}
+        <Link to="/dashboard" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/dashboard') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <LayoutDashboard className="w-5 h-5" />
+          Dashboard
+        </Link>
+        <Link to="/tasks?view=my" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/tasks', 'my') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <User className="w-5 h-5" />
+          My Tasks
+        </Link>
+        <Link to="/tasks?view=delegated" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/tasks', 'delegated') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <Send className="w-5 h-5" />
+          Delegated
+        </Link>
+        <Link to="/tasks?view=redelegated" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/tasks', 'redelegated') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <Repeat className="w-5 h-5" />
+          Redelegated
+        </Link>
+        <Link to="/projects" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/projects') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <FolderKanban className="w-5 h-5" />
+          Projects
+        </Link>
+        <Link to="/calendar" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/calendar') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
+          <HelpCircle className="w-5 h-5" />
+          Calendar
+        </Link>
         {user?.role === 'admin' && (
-          <Link
-            to="/admin"
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
-              location.pathname === '/admin' ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent'
-            )}
-          >
+          <Link to="/admin" className={cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors', isActive('/admin') ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-accent')}>
             <Users className="w-5 h-5" />
             Admin
           </Link>
@@ -59,7 +56,7 @@ export function Sidebar() {
       </nav>
       <div className="border-t pt-4 mt-4 space-y-1">
         <Link to="/about" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent transition-colors">
-          <InfoCircle className="w-5 h-5" />
+          <Info className="w-5 h-5" />
           About
         </Link>
         <Link to="/help" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent transition-colors">

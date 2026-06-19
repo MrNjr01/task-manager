@@ -38,7 +38,7 @@ export default function Tasks() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{viewTitle}</h1>
-          <p className="text-muted-foreground">{filteredTasks.length} tasks</p>
+          <p className="text-muted-foreground">{tasks.length} tasks</p>
         </div>
         <div className="flex items-center gap-3">
           <ViewSwitcher mode={view} onChange={setView} />
