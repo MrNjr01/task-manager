@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 import { authenticate, AuthRequest, authorizeAdmin } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { updateUserSchema, userIdParamSchema } from '../schemas/user.schema';
-import { listUsers, getUserById, updateUser, deactivateUser, uploadUserProfile } from '../services/user.service';
+import { listUsers, getUserById, updateUser, deactivateUser, activateUser, hardDeleteUser, uploadUserProfile } from '../services/user.service';
 
 const router = Router();
 
@@ -51,8 +51,13 @@ router.put('/users/:id', validate(userIdParamSchema, 'params'), validate(updateU
 
 router.delete('/users/:id', validate(userIdParamSchema, 'params'), authorizeAdmin, async (req, res, next) => {
   try {
-    await deactivateUser(req.params.id);
-    res.json({ data: { message: 'User deactivated' } });
+    if (req.query.hard === 'true') {
+      await hardDeleteUser(req.params.id);
+      res.json({ data: { message: 'User permanently deleted' } });
+    } else {
+      await deactivateUser(req.params.id);
+      res.json({ data: { message: 'User deactivated' } });
+    }
   } catch (err) { next(err); }
 });
 

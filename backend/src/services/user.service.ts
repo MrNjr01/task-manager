@@ -36,6 +36,21 @@ export async function deactivateUser(id: string) {
   return prisma.user.update({ where: { id }, data: { isActive: false } });
 }
 
+export async function activateUser(id: string) {
+  return prisma.user.update({ where: { id }, data: { isActive: true } });
+}
+
+export async function hardDeleteUser(id: string) {
+  // Delete all related task assignments first
+  await prisma.taskAssignment.deleteMany({ where: { userId: id } });
+  // Delete tasks created by this user
+  await prisma.task.deleteMany({ where: { createdBy: id } });
+  // Delete projects created by this user
+  await prisma.project.deleteMany({ where: { createdBy: id } });
+  // Delete the user
+  return prisma.user.delete({ where: { id } });
+}
+
 export async function uploadUserProfile(userId: string, filePath: string) {
   return prisma.user.update({ where: { id: userId }, data: { profilePhoto: filePath } });
 }

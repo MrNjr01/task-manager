@@ -44,9 +44,20 @@ export default function Admin() {
     setEditingUser(null);
   };
 
-  const deleteUser = async (userId: string) => {
+  const deactivateUser = async (userId: string) => {
     if (!confirm('Deactivate this user?')) return;
-    await api.delete(`/api/users/${userId}`);
+    await api.put(`/api/users/${userId}`, { isActive: false });
+    fetchUsers();
+  };
+
+  const activateUser = async (userId: string) => {
+    await api.put(`/api/users/${userId}`, { isActive: true });
+    fetchUsers();
+  };
+
+  const hardDeleteUser = async (userId: string) => {
+    if (!confirm('Permanently delete this user? This cannot be undone.')) return;
+    await api.delete(`/api/users/${userId}?hard=true`);
     fetchUsers();
   };
 
@@ -76,7 +87,7 @@ export default function Admin() {
 
       {loading && <div className="text-center py-8">Loading...</div>}
 
-      {!loading && <AdminUserTable users={users} onEdit={u => setEditingUser(u)} onDelete={deleteUser} onPhotoUpload={id => setPhotoUserId(id)} />}
+      {!loading && <AdminUserTable users={users} onEdit={u => setEditingUser(u)} onDeactivate={deactivateUser} onActivate={activateUser} onDelete={hardDeleteUser} onPhotoUpload={id => setPhotoUserId(id)} />}
 
       {showCreate && <UserForm mode="create" onCreate={createUser} onClose={() => setShowCreate(false)} />}
       {editingUser && <UserForm mode="edit" user={editingUser} onUpdate={updateUser} onClose={() => setEditingUser(null)} />}

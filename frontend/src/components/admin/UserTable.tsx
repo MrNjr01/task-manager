@@ -12,11 +12,13 @@ interface User {
 interface AdminUserTableProps {
   users: User[];
   onEdit: (user: User) => void;
+  onDeactivate: (userId: string) => void;
+  onActivate: (userId: string) => void;
   onDelete: (userId: string) => void;
   onPhotoUpload: (userId: string) => void;
 }
 
-export function AdminUserTable({ users, onEdit, onDelete, onPhotoUpload }: AdminUserTableProps) {
+export function AdminUserTable({ users, onEdit, onDeactivate, onActivate, onDelete, onPhotoUpload }: AdminUserTableProps) {
   return (
     <div className="border rounded-lg overflow-hidden">
       <table className="w-full text-sm">
@@ -53,7 +55,12 @@ export function AdminUserTable({ users, onEdit, onDelete, onPhotoUpload }: Admin
                 <div className="flex gap-2">
                   <button onClick={() => onEdit(u)} className="text-xs text-blue-600 hover:underline">Edit</button>
                   <button onClick={() => onPhotoUpload(u.id)} className="text-xs text-green-600 hover:underline">Photo</button>
-                  {u.isActive && <button onClick={() => onDelete(u.id)} className="text-xs text-destructive hover:underline">Deactivate</button>}
+                  {u.isActive ? (
+                    <button onClick={() => onDeactivate(u.id)} className="text-xs text-orange-600 hover:underline">Deactivate</button>
+                  ) : (
+                    <button onClick={() => onActivate(u.id)} className="text-xs text-green-600 hover:underline">Activate</button>
+                  )}
+                  <button onClick={() => onDelete(u.id)} className="text-xs text-destructive hover:underline">Delete</button>
                 </div>
               </td>
             </tr>

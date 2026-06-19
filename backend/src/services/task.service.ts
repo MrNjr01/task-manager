@@ -7,6 +7,10 @@ function serializeTask(task: any) {
     dueDate: task.dueDate.toISOString(),
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
+    assignees: task.assignments ? task.assignments.map((a: any) => ({
+      user: a.user,
+      assignedByUser: a.assignedByUser,
+    })) : [],
   };
 }
 
@@ -26,7 +30,7 @@ export async function listTasks(userId: string, role: string, filters: any, page
   const tasks = await prisma.task.findMany({
     where,
     include: {
-      assignees: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
+      assignments: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
       project: { select: { id: true, name: true } },
     },
     skip: (page - 1) * limit,
@@ -40,7 +44,7 @@ export async function getTask(id: string, userId: string, role: string) {
   const task = await prisma.task.findFirst({
     where: role === 'admin' ? { id } : { id, assignments: { some: { userId } } },
     include: {
-      assignees: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
+      assignments: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
       project: { select: { id: true, name: true } },
       subtasks: true,
     },
@@ -56,14 +60,14 @@ export async function createTask(data: any, createdById: string) {
       createdBy: createdById,
       assignments: { createMany: { data: assigneeIds.map((uid: string) => ({ userId: uid, assignedBy: createdById })) } },
     },
-    include: { assignees: { include: { user: { select: { id: true, name: true } }, assignedByUser: { select: { id: true, name: true } } } } },
+    include: { assignments: { include: { user: { select: { id: true, name: true } }, assignedByUser: { select: { id: true, name: true } } } } },
   });
   return serializeTask(task);
 }
 
 export async function updateTask(id: string, data: any) {
   const task = await prisma.task.update({ where: { id }, data });
-  return serializeTask(task);
+  return serializeTask({ ...task, assignments: [] });
 }
 
 export async function deleteTask(id: string) {
@@ -85,7 +89,7 @@ export async function removeAssignee(taskId: string, userId: string) {
 
 export async function updateTaskStatus(id: string, status: string) {
   const task = await prisma.task.update({ where: { id }, data: { status } });
-  return serializeTask(task);
+  return serializeTask({ ...task, assignments: [] });
 }
 
 export async function getSubtasks(taskId: string, userId: string, role: string) {
@@ -95,9 +99,9 @@ export async function getSubtasks(taskId: string, userId: string, role: string) 
       ...(role === 'admin' ? {} : { assignments: { some: { userId } } }),
     },
     include: {
-      assignees: { include: { user: { select: { id: true, name: true, email: true } } } },
+      assignments: { include: { user: { select: { id: true, name: true, email: true } } } },
     },
     orderBy: { orderIndex: 'asc' },
   });
-  return tasks.map(serializeTask);
+  return tasks.map(t => serializeTask({ ...t, assignments: t.assignments || [] }));
 }
