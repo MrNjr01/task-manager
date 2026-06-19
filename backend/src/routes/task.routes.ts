@@ -3,6 +3,7 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { createTaskSchema, updateTaskSchema, assignTaskSchema } from '../schemas/task.schema';
 import { listTasks, getTask, createTask, updateTask, deleteTask, addAssignees, removeAssignee, redelegateTask, updateTaskStatus, getSubtasks } from '../services/task.service';
+import { prisma } from '../prisma/client';
 
 const router = Router();
 router.use(authenticate);
@@ -66,6 +67,25 @@ router.patch('/tasks/:id/status', async (req: AuthRequest, res, next) => {
     if (!status || !['todo', 'in_progress', 'review', 'done'].includes(status)) {
       return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Valid status required' } });
     }
+
+    // If marking done, record this user's completion
+    if (status === 'done') {
+      await prisma.taskAssignment.updateMany({
+        where: { taskId: req.params.id, userId: req.user!.userId },
+        data: { completedAt: new Date() },
+      });
+
+      // Check if all assignees have completed
+      const assignments = await prisma.taskAssignment.findMany({
+        where: { taskId: req.params.id },
+      });
+      const allCompleted = assignments.length > 0 && assignments.every(a => a.completedAt !== null);
+      const finalStatus = allCompleted ? 'done' : 'in_progress';
+      const task = await updateTaskStatus(req.params.id, finalStatus);
+      return res.json({ data: { task } });
+    }
+
+    // For other statuses, just update
     const task = await updateTaskStatus(req.params.id, status);
     res.json({ data: { task } });
   } catch (err) { next(err); }

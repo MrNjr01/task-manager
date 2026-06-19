@@ -32,7 +32,7 @@ export function TaskList({ tasks, onEdit }: TaskListProps) {
             <th className="text-left p-3 font-medium">Status</th>
             <th className="text-left p-3 font-medium">Priority</th>
             <th className="text-left p-3 font-medium">Due</th>
-            <th className="text-left p-3 font-medium">Assignees</th>
+            <th className="text-left p-3 font-medium">Assigned By</th>
           </tr>
         </thead>
         <tbody className="divide-y">
@@ -42,7 +42,7 @@ export function TaskList({ tasks, onEdit }: TaskListProps) {
               <td className="p-3"><span className={cn('px-2 py-0.5 rounded-full text-xs', statusColors[t.status])}>{statusLabels[t.status]}</span></td>
               <td className="p-3 capitalize">{t.priority}</td>
               <td className="p-3">{formatDate(t.dueDate)}</td>
-              <td className="p-3">{t.assignees.map(a => a.user.name).join(', ')}</td>
+              <td className="p-3">{t.assignees?.[0]?.assignedByUser?.name || '—'}</td>
             </tr>
           ))}
         </tbody>

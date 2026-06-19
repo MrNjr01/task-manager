@@ -23,7 +23,7 @@ export default function Tasks() {
   const { tasks, loading, createTask, updateTask } = useTasks({ scope: scopeMap[viewFilter] || 'my' });
 
   useEffect(() => {
-    api.get<any>('/api/users').then(r => setUsers(r.data.users)).catch(() => setUsers([]));
+    api.get<any>('/api/users/active').then(r => setUsers(r.data.users)).catch(() => setUsers([]));
     api.get<any>('/api/projects').then(r => setProjects(r.data.projects)).catch(() => setProjects([]));
   }, []);
 

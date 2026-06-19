@@ -34,6 +34,14 @@ router.get('/users', authorizeAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/users/active - returns only active users (for assignment)
+router.get('/users/active', async (req, res, next) => {
+  try {
+    const { users, total } = await listUsers({ isActive: 'true' }, 1, 100);
+    res.json({ data: { users }, pagination: { page: 1, limit: 100, total, pages: 1 } });
+  } catch (err) { next(err); }
+});
+
 router.get('/users/:id', validate(userIdParamSchema, 'params'), async (req: AuthRequest, res, next) => {
   try {
     const user = await getUserById(req.params.id);
