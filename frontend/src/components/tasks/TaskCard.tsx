@@ -19,7 +19,7 @@ export function TaskCard({ task, onEdit, compact = false }: TaskCardProps) {
   const overdue = task.status !== 'done' && isOverdue(task.dueDate);
 
   return (
-    <div className={cn('border rounded-lg bg-card p-3', overdue && 'border-red-300 dark:border-red-800')}>
+    <div onClick={() => onEdit?.(task)} className={cn('border rounded-lg bg-card p-3 cursor-pointer hover:bg-accent/50', overdue && 'border-red-300 dark:border-red-800')}>
       <div className="flex items-start justify-between gap-2">
         <h4 className="font-medium text-sm truncate">{task.title}</h4>
         <Flag className={cn('w-4 h-4 flex-shrink-0', priorityColors[task.priority])} />
