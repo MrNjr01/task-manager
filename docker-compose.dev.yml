@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tm-postgres-dev
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: apppassword
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d taskmanager"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: tm-backend-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads_dev:/app/uploads
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://app:apppassword@localhost:5432/taskmanager
+      JWT_SECRET: dev-secret-do-not-use-in-production
+      NODE_ENV: development
+      PORT: 4000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: tm-frontend-dev
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:4000
+
+volumes:
+  pgdata_dev:
+  uploads_dev:
