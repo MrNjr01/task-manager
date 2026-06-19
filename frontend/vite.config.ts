@@ -16,8 +16,8 @@ export default defineConfig({
       interval: 1000,
     },
     proxy: {
-      '/api': 'http://localhost:4000',
-      '/uploads': 'http://localhost:4000',
+      '/api': 'http://backend:4000',
+      '/uploads': 'http://backend:4000',
     },
   },
 });

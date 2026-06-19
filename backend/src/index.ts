@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { errorHandler } from './middleware/errorHandler';
-import { loginLimiter, apiLimiter } from './middleware/rateLimiter';
+import { apiLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import projectRoutes from './routes/project.routes';
@@ -19,7 +19,6 @@ app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
-app.use('/api', loginLimiter);
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api', projectRoutes);

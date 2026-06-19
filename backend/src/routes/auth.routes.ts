@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
+import { loginLimiter } from '../middleware/rateLimiter';
 import { loginSchema, createUserSchema } from '../schemas/auth.schema';
 import { authenticateUser, generateToken, createUser } from '../services/auth.service';
 import { prisma } from '../prisma/client';
 
 const router = Router();
 
-router.post('/auth/login', validate(loginSchema), async (req, res, next) => {
+router.post('/auth/login', loginLimiter, validate(loginSchema), async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await authenticateUser(email, password);
