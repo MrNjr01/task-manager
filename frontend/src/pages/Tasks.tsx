@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useTasks, Task } from '../hooks/useTasks';
 import { ViewSwitcher, ViewMode } from '../components/tasks/ViewSwitcher';
@@ -9,9 +10,9 @@ import { TaskForm } from '../components/tasks/TaskForm';
 import { api } from '../lib/api';
 
 export default function Tasks() {
+  const navigate = useNavigate();
   const [view, setView] = useState<ViewMode>('list');
   const [showForm, setShowForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const { tasks, loading, createTask, updateTask } = useTasks();
@@ -42,17 +43,16 @@ export default function Tasks() {
 
       {loading && <div className="text-center py-8">Loading tasks...</div>}
 
-      {view === 'list' && !loading && <TaskList tasks={tasks} onEdit={t => { setEditingTask(t); setShowForm(true); }} />}
-      {view === 'kanban' && !loading && <TaskKanban tasks={tasks} onEdit={t => { setEditingTask(t); setShowForm(true); }} onStatusChange={handleStatusChange} />}
-      {view === 'tree' && !loading && <TaskTree tasks={tasks} onEdit={t => { setEditingTask(t); setShowForm(true); }} />}
+      {view === 'list' && !loading && <TaskList tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
+      {view === 'kanban' && !loading && <TaskKanban tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} onStatusChange={handleStatusChange} />}
+      {view === 'tree' && !loading && <TaskTree tasks={tasks} onEdit={t => navigate(`/tasks/${t.id}`)} />}
 
       {showForm && (
         <TaskForm
-          task={editingTask}
           users={users}
           projects={projects}
-          onSave={editingTask ? (data) => updateTask(editingTask.id, data) : createTask}
-          onClose={() => { setShowForm(false); setEditingTask(null); }}
+          onSave={createTask}
+          onClose={() => setShowForm(false)}
         />
       )}
     </div>

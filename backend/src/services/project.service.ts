@@ -1,7 +1,7 @@
 import { prisma } from '../prisma/client';
 
 export async function listProjects(userId: string, role: string, page: number, limit: number) {
-  const where: any = role === 'admin' ? {} : { tasks: { some: { assignments: { some: { userId } } } } };
+  const where: any = role === 'admin' ? {} : { createdBy: userId };
   const total = await prisma.project.count({ where });
   const projects = await prisma.project.findMany({
     where,
@@ -30,7 +30,7 @@ export async function listProjects(userId: string, role: string, page: number, l
 
 export async function getProject(id: string, userId: string, role: string) {
   const project = await prisma.project.findFirst({
-    where: role === 'admin' ? { id } : { id, tasks: { some: { assignments: { some: { userId } } } } },
+    where: role === 'admin' ? { id } : { id, createdBy: userId },
     include: { creator: { select: { id: true, name: true, email: true } } },
   });
   if (!project) return null;

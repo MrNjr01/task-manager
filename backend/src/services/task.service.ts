@@ -87,6 +87,21 @@ export async function removeAssignee(taskId: string, userId: string) {
   return prisma.taskAssignment.deleteMany({ where: { taskId, userId } });
 }
 
+export async function redelegateTask(taskId: string, fromUserId: string, toUserId: string, reassignedBy: string) {
+  // Remove old assignee and add new one
+  await prisma.taskAssignment.deleteMany({ where: { taskId, userId: fromUserId } });
+  await prisma.taskAssignment.create({
+    data: { taskId, userId: toUserId, assignedBy: reassignedBy },
+  });
+  const task = await prisma.task.findFirst({
+    where: { id: taskId },
+    include: {
+      assignments: { include: { user: { select: { id: true, name: true } }, assignedByUser: { select: { id: true, name: true } } } },
+    },
+  });
+  return task ? serializeTask(task) : null;
+}
+
 export async function updateTaskStatus(id: string, status: string) {
   const task = await prisma.task.update({ where: { id }, data: { status } });
   return serializeTask({ ...task, assignments: [] });

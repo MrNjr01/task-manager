@@ -6,6 +6,7 @@ interface DelegatedPerson {
   totalAssigned: number;
   completed: number;
   pending: number;
+  inProgress: number;
   overdue: number;
 }
 
@@ -36,8 +37,9 @@ export function DelegatedKpis() {
               <p className="text-sm text-muted-foreground">{p.user.email}</p>
             </div>
           </div>
-          <div className="flex gap-4 text-sm">
+          <div className="flex gap-3 text-sm">
             <span className="text-muted-foreground">{p.totalAssigned} assigned</span>
+            <span className="text-blue-600">{p.inProgress} in progress</span>
             <span className="text-green-600">{p.completed} done</span>
             <span className="text-amber-600">{p.pending} pending</span>
             {p.overdue > 0 && <span className="text-red-600">{p.overdue} overdue</span>}

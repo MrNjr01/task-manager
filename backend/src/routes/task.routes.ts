@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { createTaskSchema, updateTaskSchema, assignTaskSchema } from '../schemas/task.schema';
-import { listTasks, getTask, createTask, updateTask, deleteTask, addAssignees, removeAssignee, updateTaskStatus, getSubtasks } from '../services/task.service';
+import { listTasks, getTask, createTask, updateTask, deleteTask, addAssignees, removeAssignee, redelegateTask, updateTaskStatus, getSubtasks } from '../services/task.service';
 
 const router = Router();
 router.use(authenticate);
@@ -81,6 +81,17 @@ router.delete('/tasks/:id/assign/:userId', async (req: AuthRequest, res, next) =
     }
     next(err);
   }
+});
+
+router.post('/tasks/:id/redelegate', async (req: AuthRequest, res, next) => {
+  try {
+    const { fromUserId, toUserId } = req.body;
+    if (!fromUserId || !toUserId) {
+      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'fromUserId and toUserId required' } });
+    }
+    const task = await redelegateTask(req.params.id, fromUserId, toUserId, req.user!.userId);
+    res.json({ data: { task } });
+  } catch (err) { next(err); }
 });
 
 router.get('/tasks/:id/subtasks', async (req: AuthRequest, res, next) => {
