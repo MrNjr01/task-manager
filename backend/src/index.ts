@@ -6,6 +6,9 @@ import { errorHandler } from './middleware/errorHandler';
 import { loginLimiter, apiLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
+import projectRoutes from './routes/project.routes';
+import taskRoutes from './routes/task.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -19,9 +22,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api', loginLimiter);
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
+app.use('/api', projectRoutes);
+app.use('/api', taskRoutes);
+app.use('/api', dashboardRoutes);
 app.use('/api', apiLimiter);
-
-// Remaining routes: projectRoutes, taskRoutes, dashboardRoutes
 
 app.use(errorHandler);
 
