@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { ArrowLeft, Play, Check, Repeat } from 'lucide-react';
+import { ArrowLeft, Play, Check, Repeat, Trash2, Undo2 } from 'lucide-react';
 
 export default function TaskDetail() {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +20,7 @@ export default function TaskDetail() {
         setTask(r.data.task);
         setLoading(false);
       }).catch(() => setLoading(false));
-      api.get<any>('/api/users').then(r => setAllUsers(r.data.users)).catch(() => {});
+      api.get<any>('/api/users/active').then(r => setAllUsers(r.data.users)).catch(() => {});
     }
   }, [id]);
 
@@ -121,13 +121,27 @@ export default function TaskDetail() {
             </button>
           </div>
 
+          {/* Creator-only actions (only when task is still todo) */}
+          {task.createdBy === user?.id && task.status === 'todo' && (
+            <div className="border-t pt-4 flex flex-wrap gap-3">
+              <button onClick={() => { if (confirm('Delete this task?')) { api.delete(`/api/tasks/${id}`).then(() => navigate('/tasks')); } }} className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                <Trash2 className="w-4 h-4" /> Delete Task
+              </button>
+              {task.assignees?.some((a: any) => a.reassignedFrom) && (
+                <button onClick={() => { /* un-redelegate logic */ }} className="flex items-center gap-2 px-4 py-2 bg-slate-500 text-white rounded-md hover:bg-slate-600">
+                  <Undo2 className="w-4 h-4" /> Un-Redelegate
+                </button>
+              )}
+            </div>
+          )}
+
           {showRedelegate && (
             <div className="border rounded-lg p-4 space-y-3">
               <label className="text-sm font-medium">Redelegate to:</label>
               <select value={redelegateTo} onChange={e => setRedelegateTo(e.target.value)} className="w-full px-3 py-2 border rounded-md bg-background">
                 <option value="">Select user</option>
                 {allUsers.filter(u => u.id !== user?.id && u.isActive).map(u => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.department})</option>
+                  <option key={u.id} value={u.id}>{u.name} — {u.department} ({u.designation})</option>
                 ))}
               </select>
               <button onClick={redelegate} disabled={!redelegateTo} className="px-4 py-2 bg-purple-500 text-white rounded-md disabled:opacity-50">
