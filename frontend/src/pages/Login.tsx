@@ -27,7 +27,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <form onSubmit={handleSubmit} className="w-full max-w-sm p-8 border rounded-lg shadow-sm bg-card space-y-4">
-        <h1 className="text-2xl font-bold text-center">Task Manager</h1>
+        <h1 className="text-2xl font-bold text-center">Simple Task Manager</h1>
         <p className="text-center text-muted-foreground text-sm">Sign in to your account</p>
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
         <div className="space-y-2">

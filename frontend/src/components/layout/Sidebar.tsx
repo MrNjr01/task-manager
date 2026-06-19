@@ -16,7 +16,7 @@ export function Sidebar() {
   return (
     <aside className="w-64 min-h-screen border-r bg-card p-4">
       <div className="mb-8">
-        <h1 className="text-xl font-bold">Task Manager</h1>
+        <h1 className="text-xl font-bold">Simple Task Manager</h1>
         <p className="text-sm text-muted-foreground">{user?.department}</p>
       </div>
       <nav className="space-y-1">

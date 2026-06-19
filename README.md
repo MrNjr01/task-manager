@@ -1,4 +1,4 @@
-# Task Manager
+# Simple Task Manager
 
 Task and project management system with flat assignment, role-based access, and multi-view task organization.
 
