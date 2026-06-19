@@ -14,7 +14,7 @@ export interface Task {
   depType: 'none' | 'sequential' | 'parallel';
   orderIndex: number;
   createdBy: string;
-  assignees: { user: { id: string; name: string; email: string }; assignedByUser: { id: string; name: string } }[];
+  assignees: { user: { id: string; name: string; email: string }; assignedByUser: { id: string; name: string }; reassignedFrom: string | null }[];
   project?: { id: string; name: string } | null;
 }
 
