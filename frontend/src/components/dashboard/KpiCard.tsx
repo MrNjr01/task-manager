@@ -9,14 +9,14 @@ interface KpiCardProps {
 
 export function KpiCard({ title, value, icon: Icon, color }: KpiCardProps) {
   return (
-    <div className="p-4 border rounded-lg bg-card">
+    <div className="group p-5 border rounded-xl bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold mt-1">{value}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-3xl font-bold mt-1.5 tracking-tight">{value}</p>
         </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="w-6 h-6" />
+        <div className={`p-2.5 rounded-xl ${color} group-hover:scale-110 transition-transform duration-200`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
     </div>
