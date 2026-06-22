@@ -15,17 +15,20 @@ export default function Tasks() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const viewFilter = searchParams.get('view') || 'my';
+  const urlStatus = searchParams.get('status') || '';
   const [view, setView] = useState<ViewMode>('list');
   const [showForm, setShowForm] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ status: '', priority: '', search: '' });
+  const [filters, setFilters] = useState({ status: urlStatus, priority: '', search: '' });
   const [sortBy, setSortBy] = useState('dueDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const scopeMap: Record<string, string> = { my: 'my', delegated: 'delegated', redelegated: 'redelegated' };
-  const { tasks, loading, createTask, updateTask } = useTasks({ scope: scopeMap[viewFilter] || 'my' });
+  const apiFilters: Record<string, string> = { scope: scopeMap[viewFilter] || 'my' };
+  if (urlStatus && urlStatus !== 'overdue') apiFilters.status = urlStatus;
+  const { tasks, loading, createTask, updateTask } = useTasks(apiFilters);
 
   useEffect(() => {
     api.get<any>('/api/users/active').then(r => setUsers(r.data.users)).catch(() => setUsers([]));
@@ -36,9 +39,13 @@ export default function Tasks() {
     try { await updateTask(taskId, { status }); } catch {}
   };
 
-  // Apply filters
+  // Apply client-side filters
+  const now = new Date();
   const filtered = tasks.filter(t => {
-    if (filters.status && t.status !== filters.status) return false;
+    // Status filter (including overdue)
+    if (filters.status === 'overdue') {
+      if (t.status === 'done' || new Date(t.dueDate) >= now) return false;
+    } else if (filters.status && t.status !== filters.status) return false;
     if (filters.priority && t.priority !== filters.priority) return false;
     if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     return true;
@@ -97,6 +104,7 @@ export default function Tasks() {
             <option value="in_progress">In Progress</option>
             <option value="review">Review</option>
             <option value="done">Done</option>
+            <option value="overdue">Overdue</option>
           </select>
           <select value={filters.priority} onChange={e => setFilters(f => ({ ...f, priority: e.target.value }))} className="px-3 py-1.5 border rounded-md text-sm bg-background">
             <option value="">All Priority</option>

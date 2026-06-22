@@ -49,6 +49,12 @@ export default function Dashboard() {
   const delKpis = calcKpis(delegatedTasks);
   const redKpis = calcKpis(redelegatedTasks);
 
+  const goToTasks = (view: string, filter?: string) => {
+    const params = new URLSearchParams({ view });
+    if (filter) params.set('status', filter);
+    navigate(`/tasks?${params.toString()}`);
+  };
+
   const TaskTable = ({ tasks, showAssignee = false, isRedelegated = false }: { tasks: any[]; showAssignee?: boolean; isRedelegated?: boolean }) => (
     <div className="border rounded-xl overflow-hidden mt-3 bg-card shadow-sm">
       <table className="w-full text-sm">
@@ -96,10 +102,10 @@ export default function Dashboard() {
           <span className="text-sm text-muted-foreground">{myTasks.length} tasks</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard title="Pending" value={myKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
-          <KpiCard title="In Progress" value={myKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" />
-          <KpiCard title="Completed" value={myKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
-          <KpiCard title="Overdue" value={myKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" />
+          <KpiCard title="Pending" value={myKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" onClick={() => goToTasks('my', 'todo')} />
+          <KpiCard title="In Progress" value={myKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" onClick={() => goToTasks('my', 'in_progress')} />
+          <KpiCard title="Completed" value={myKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" onClick={() => goToTasks('my', 'done')} />
+          <KpiCard title="Overdue" value={myKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" onClick={() => goToTasks('my', 'overdue')} />
         </div>
         {myTasks.length > 0 && <TaskTable tasks={myTasks} />}
       </section>
@@ -111,10 +117,10 @@ export default function Dashboard() {
           <span className="text-sm text-muted-foreground">{delegatedTasks.length} tasks</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard title="Pending" value={delKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
-          <KpiCard title="In Progress" value={delKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" />
-          <KpiCard title="Completed" value={delKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
-          <KpiCard title="Overdue" value={delKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" />
+          <KpiCard title="Pending" value={delKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" onClick={() => goToTasks('delegated', 'todo')} />
+          <KpiCard title="In Progress" value={delKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" onClick={() => goToTasks('delegated', 'in_progress')} />
+          <KpiCard title="Completed" value={delKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" onClick={() => goToTasks('delegated', 'done')} />
+          <KpiCard title="Overdue" value={delKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" onClick={() => goToTasks('delegated', 'overdue')} />
         </div>
         {delegatedTasks.length > 0 && <TaskTable tasks={delegatedTasks} showAssignee />}
       </section>
@@ -126,10 +132,10 @@ export default function Dashboard() {
           <span className="text-sm text-muted-foreground">{redelegatedTasks.length} tasks</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard title="Pending" value={redKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" />
-          <KpiCard title="In Progress" value={redKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" />
-          <KpiCard title="Completed" value={redKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
-          <KpiCard title="Overdue" value={redKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" />
+          <KpiCard title="Pending" value={redKpis.pending} icon={ClipboardList} color="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" onClick={() => goToTasks('redelegated', 'todo')} />
+          <KpiCard title="In Progress" value={redKpis.inProgress} icon={Clock} color="bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" onClick={() => goToTasks('redelegated', 'in_progress')} />
+          <KpiCard title="Completed" value={redKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" onClick={() => goToTasks('redelegated', 'done')} />
+          <KpiCard title="Overdue" value={redKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" onClick={() => goToTasks('redelegated', 'overdue')} />
         </div>
         {redelegatedTasks.length > 0 && <TaskTable tasks={redelegatedTasks} isRedelegated />}
       </section>

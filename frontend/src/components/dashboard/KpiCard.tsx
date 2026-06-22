@@ -5,11 +5,15 @@ interface KpiCardProps {
   value: number;
   icon: LucideIcon;
   color: string;
+  onClick?: () => void;
 }
 
-export function KpiCard({ title, value, icon: Icon, color }: KpiCardProps) {
+export function KpiCard({ title, value, icon: Icon, color, onClick }: KpiCardProps) {
   return (
-    <div className="group p-5 border rounded-xl bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+    <div
+      onClick={onClick}
+      className={`group p-5 border rounded-xl bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+    >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
