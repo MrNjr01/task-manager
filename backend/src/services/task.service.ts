@@ -57,15 +57,47 @@ export async function listTasks(userId: string, role: string, filters: any, page
 }
 
 export async function getTask(id: string, userId: string, role: string) {
-  const task = await prisma.task.findFirst({
-    where: role === 'admin' ? { id } : { id, assignments: { some: { userId } } },
-    include: {
-      assignments: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
-      project: { select: { id: true, name: true } },
-      subtasks: true,
-    },
+  if (role === 'admin') {
+    const task = await prisma.task.findFirst({ where: { id } });
+    return task ? serializeTask({ ...task, assignments: [] }) : null;
+  }
+
+  // Check if user has any connection to this task:
+  // 1. User is an assignee
+  // 2. User assigned this task (assignedBy)
+  // 3. User owns the reference task (for redelegated tasks)
+  const assignment = await prisma.taskAssignment.findFirst({
+    where: { taskId: id, OR: [{ userId }, { assignedBy: userId }] },
   });
-  return task ? serializeTask(task) : null;
+  if (assignment) {
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        assignments: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
+        project: { select: { id: true, name: true } },
+        subtasks: true,
+      },
+    });
+    return task ? serializeTask(task) : null;
+  }
+
+  // Check if user owns the reference task (redelegated view)
+  const refAssignment = await prisma.taskAssignment.findFirst({
+    where: { userId },
+  });
+  if (refAssignment) {
+    const task = await prisma.task.findFirst({
+      where: { id, referenceTaskId: refAssignment.taskId },
+      include: {
+        assignments: { include: { user: { select: { id: true, name: true, email: true, profilePhoto: true } }, assignedByUser: { select: { id: true, name: true } } } },
+        project: { select: { id: true, name: true } },
+        subtasks: true,
+      },
+    });
+    return task ? serializeTask(task) : null;
+  }
+
+  return null;
 }
 
 export async function createTask(data: any, createdById: string) {
