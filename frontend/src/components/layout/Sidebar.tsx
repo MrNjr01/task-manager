@@ -1,5 +1,5 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { LayoutDashboard, User, Send, Repeat, FolderKanban, Users, Info, HelpCircle, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, User, Send, Repeat, FolderKanban, Users, Info, HelpCircle, CheckSquare, Palette } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 
@@ -36,7 +36,10 @@ export function Sidebar() {
         <NavItem to="/projects" icon={FolderKanban} label="Projects" active={isActive('/projects')} />
         <NavItem to="/calendar" icon={HelpCircle} label="Calendar" active={isActive('/calendar')} />
         {user?.role === 'admin' && (
-          <NavItem to="/admin" icon={Users} label="Admin" active={isActive('/admin')} />
+          <>
+            <NavItem to="/admin" icon={Users} label="Admin" active={isActive('/admin')} />
+            <NavItem to="/customize" icon={Palette} label="Customize" active={isActive('/customize')} />
+          </>
         )}
       </nav>
 

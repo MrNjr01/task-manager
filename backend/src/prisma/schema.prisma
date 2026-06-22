@@ -74,26 +74,29 @@ model Project {
 }
 
 model Task {
-  id           String        @id @default(uuid())
-  projectId    String?       @map("project_id")
-  parentTaskId String?       @map("parent_task_id")
-  title        String
-  description  String?
-  status       TaskStatus    @default(todo)
-  priority     TaskPriority  @default(medium)
-  dueDate      DateTime      @map("due_date")
-  startDate    DateTime      @map("start_date")
-  depType      TaskDepType   @default(none) @map("dep_type")
-  orderIndex   Int           @default(0) @map("order_index")
-  createdBy    String        @map("created_by")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  id              String        @id @default(uuid())
+  projectId       String?       @map("project_id")
+  parentTaskId    String?       @map("parent_task_id")
+  referenceTaskId String?       @map("reference_task_id")
+  title           String
+  description     String?
+  status          TaskStatus    @default(todo)
+  priority        TaskPriority  @default(medium)
+  dueDate         DateTime      @map("due_date")
+  startDate       DateTime      @map("start_date")
+  depType         TaskDepType   @default(none) @map("dep_type")
+  orderIndex      Int           @default(0) @map("order_index")
+  createdBy       String        @map("created_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
-  project     Project?         @relation(fields: [projectId], references: [id])
-  parent      Task?            @relation("TaskSubtasks", fields: [parentTaskId], references: [id])
-  subtasks    Task[]           @relation("TaskSubtasks")
-  creator     User             @relation("TaskCreator", fields: [createdBy], references: [id])
-  assignments TaskAssignment[]
+  project         Project?         @relation(fields: [projectId], references: [id])
+  parent          Task?            @relation("TaskSubtasks", fields: [parentTaskId], references: [id])
+  subtasks        Task[]           @relation("TaskSubtasks")
+  reference       Task?            @relation("TaskRedelegations", fields: [referenceTaskId], references: [id])
+  redelegations   Task[]           @relation("TaskRedelegations")
+  creator         User             @relation("TaskCreator", fields: [createdBy], references: [id])
+  assignments     TaskAssignment[]
 
   @@map("tasks")
 }

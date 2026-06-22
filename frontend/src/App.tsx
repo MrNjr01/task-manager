@@ -13,6 +13,7 @@ import Calendar from './pages/Calendar';
 import About from './pages/About';
 import Help from './pages/Help';
 import Admin from './pages/Admin';
+import Customize from './pages/Customize';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, loading } = useAuth();
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="/about" element={<ProtectedRoute><AppLayout><About /></AppLayout></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><AppLayout><Help /></AppLayout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
+            <Route path="/customize" element={<ProtectedRoute adminOnly><AppLayout><Customize /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>

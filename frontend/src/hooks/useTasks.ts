@@ -5,6 +5,7 @@ export interface Task {
   id: string;
   projectId: string | null;
   parentTaskId: string | null;
+  referenceTaskId: string | null;
   title: string;
   description: string | null;
   status: 'todo' | 'in_progress' | 'review' | 'done';

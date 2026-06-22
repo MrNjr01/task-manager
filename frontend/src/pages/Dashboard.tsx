@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, Clock, CheckCircle, AlertCircle, Repeat } from 'lucide-react';
+import { ClipboardList, Clock, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { KpiCard } from '../components/dashboard/KpiCard';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -49,24 +49,35 @@ export default function Dashboard() {
   const delKpis = calcKpis(delegatedTasks);
   const redKpis = calcKpis(redelegatedTasks);
 
-  const TaskTable = ({ tasks, showAssignee = false }: { tasks: any[]; showAssignee?: boolean }) => (
-    <div className="border rounded-lg overflow-hidden mt-3">
+  const TaskTable = ({ tasks, showAssignee = false, isRedelegated = false }: { tasks: any[]; showAssignee?: boolean; isRedelegated?: boolean }) => (
+    <div className="border rounded-xl overflow-hidden mt-3 bg-card shadow-sm">
       <table className="w-full text-sm">
-        <thead className="bg-muted">
+        <thead className="bg-muted/50">
           <tr>
-            <th className="text-left p-3 font-medium">Title</th>
-            <th className="text-left p-3 font-medium">Status</th>
-            <th className="text-left p-3 font-medium">Due</th>
-            {showAssignee && <th className="text-left p-3 font-medium">Assignee</th>}
+            <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Title</th>
+            <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Status</th>
+            <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Due</th>
+            {showAssignee && <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Assignee</th>}
+            {isRedelegated && <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Original</th>}
           </tr>
         </thead>
         <tbody className="divide-y">
           {tasks.slice(0, 5).map((t: any) => (
-            <tr key={t.id} onClick={() => navigate(`/tasks/${t.id}`)} className="hover:bg-accent/50 cursor-pointer">
-              <td className="p-3 font-medium">{t.title}</td>
-              <td className="p-3 capitalize">{t.status.replace('_', ' ')}</td>
-              <td className="p-3">{new Date(t.dueDate).toLocaleDateString()}</td>
-              {showAssignee && <td className="p-3">{t.assignees?.map((a: any) => a.user.name).join(', ') || '—'}</td>}
+            <tr key={t.id} className="hover:bg-accent/30 cursor-pointer transition-colors" onClick={() => navigate(`/tasks/${t.id}`)}>
+              <td className="px-4 py-3 font-medium">{t.title}</td>
+              <td className="px-4 py-3 capitalize">{t.status.replace('_', ' ')}</td>
+              <td className="px-4 py-3 text-muted-foreground">{new Date(t.dueDate).toLocaleDateString()}</td>
+              {showAssignee && <td className="px-4 py-3">{t.assignees?.map((a: any) => a.user.name).join(', ') || '—'}</td>}
+              {isRedelegated && (
+                <td className="px-4 py-3">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/tasks/${t.referenceTaskId}`); }}
+                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" /> Go to Original
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -120,7 +131,7 @@ export default function Dashboard() {
           <KpiCard title="Completed" value={redKpis.done} icon={CheckCircle} color="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" />
           <KpiCard title="Overdue" value={redKpis.overdue} icon={AlertCircle} color="bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300" />
         </div>
-        {redelegatedTasks.length > 0 && <TaskTable tasks={redelegatedTasks} showAssignee />}
+        {redelegatedTasks.length > 0 && <TaskTable tasks={redelegatedTasks} isRedelegated />}
       </section>
     </div>
   );

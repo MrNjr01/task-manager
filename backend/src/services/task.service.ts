@@ -23,7 +23,14 @@ export async function listTasks(userId: string, role: string, filters: any, page
   } else if (scope === 'delegated') {
     where = { assignments: { some: { assignedBy: userId, userId: { not: userId } } } };
   } else if (scope === 'redelegated') {
-    where = { assignments: { some: { reassignedFrom: userId } } };
+    // Tasks that are redelegations of tasks assigned to this user
+    // First find all task IDs assigned to this user, then find tasks referencing them
+    const myTaskIds = await prisma.taskAssignment.findMany({
+      where: { userId },
+      select: { taskId: true },
+    });
+    const myIds = myTaskIds.map(a => a.taskId);
+    where = { referenceTaskId: { in: myIds } };
   }
 
   if (filters.project) where.projectId = filters.project;
@@ -97,27 +104,35 @@ export async function removeAssignee(taskId: string, userId: string) {
 }
 
 export async function redelegateTask(taskId: string, fromUserId: string, toUserId: string, reassignedBy: string) {
-  // Get original assignee before deleting
-  const currentAssignment = await prisma.taskAssignment.findFirst({
-    where: { taskId, userId: fromUserId },
-  });
-  // Remove old assignee and add new one with reassignedFrom tracking
-  await prisma.taskAssignment.deleteMany({ where: { taskId, userId: fromUserId } });
-  await prisma.taskAssignment.create({
+  // Get original task
+  const originalTask = await prisma.task.findUnique({ where: { id: taskId } });
+  if (!originalTask) throw new Error('Task not found');
+
+  // Create NEW task as a redelegation of the original
+  const newTask = await prisma.task.create({
     data: {
-      taskId,
-      userId: toUserId,
-      assignedBy: reassignedBy,
-      reassignedFrom: currentAssignment?.userId || null,
+      title: originalTask.title,
+      description: originalTask.description,
+      status: 'todo',
+      priority: originalTask.priority,
+      startDate: originalTask.startDate,
+      dueDate: originalTask.dueDate,
+      projectId: originalTask.projectId,
+      referenceTaskId: taskId, // links back to original
+      createdBy: reassignedBy,
+      assignments: {
+        create: {
+          userId: toUserId,
+          assignedBy: fromUserId, // the person who redelegated
+        },
+      },
     },
-  });
-  const task = await prisma.task.findFirst({
-    where: { id: taskId },
     include: {
       assignments: { include: { user: { select: { id: true, name: true } }, assignedByUser: { select: { id: true, name: true } } } },
     },
   });
-  return task ? serializeTask(task) : null;
+
+  return serializeTask(newTask);
 }
 
 export async function updateTaskStatus(id: string, status: string) {
