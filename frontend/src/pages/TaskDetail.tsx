@@ -65,7 +65,7 @@ export default function TaskDetail() {
   const currentAssignee = task.assignees?.find((a: any) => a.user.id === user?.id);
   const isAssigned = !!currentAssignee;
   const isCreator = task.createdBy === user?.id;
-  const canEdit = task.status !== 'done' && (isCreator || isAssigned);
+  const canEdit = task.status !== 'done' && isCreator;
   const isAdmin = user?.role === 'admin';
 
   return (
